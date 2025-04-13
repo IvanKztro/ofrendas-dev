@@ -7,7 +7,7 @@
   <meta name="description" content="Svelte demo app" />
 </svelte:head>
 
-<section>
-  <h1 class="text-2xl font-bold text-blue-400">Test</h1>
+<section class="container mx-auto px-2 md:px-0">
+  <h1 class="text-2xl font-bold text-blue-400">Map</h1>
   <Map />
 </section>
