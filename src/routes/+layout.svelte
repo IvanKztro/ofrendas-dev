@@ -3,18 +3,28 @@
   import { get } from "svelte/store";
 
   import "../app.css";
-  import { sidebarOpen } from "$lib/stores/generals";
+  import { sidebarOpen, selectedFilter, selectedLanguage, translations } from "$lib/stores/generals";
   import { onMount } from "svelte";
   import AppSidebar from "$lib/components/app/sidebar/app-sidebar.svelte";
 
   let { children } = $props();
+  let t = $state(translations.es);
+
   onMount(() => {
     sidebarOpen.set(
       localStorage.getItem("sidebarOpen") === "true" ? true : false
     );
+    // Recuperar idioma guardado
+    const savedLanguage = localStorage.getItem("language") || "es";
+    selectedLanguage.set(savedLanguage);
+    t = translations[savedLanguage as keyof typeof translations];
   });
 
-  // let sidebarOpen = $state(false);
+  // Manejar cambios de idioma
+  $effect(() => {
+    localStorage.setItem("language", $selectedLanguage);
+    t = translations[$selectedLanguage as keyof typeof translations];
+  });
 </script>
 
 <Sidebar.Provider style="--sidebar-width: 280px;">
@@ -23,7 +33,7 @@
     <header
       class="sticky top-0 z-10 flex shrink-0 items-center justify-between gap-2 border-b bg-background px-4"
     >
-      <div class="flex h-16 items-center gap-2">
+      <div class="flex h-16 items-center gap-4">
         <Sidebar.Trigger
           class="-ml-1"
           onclick={(e) => {
@@ -33,16 +43,23 @@
             e.preventDefault();
           }}
         />
-        <!-- <Separator orientation="vertical" class="mr-2 h-4" /> -->
-        <!-- <Breadcrumb /> -->
+        <img src="/logo.png" alt="Logo" class="h-8" />
       </div>
 
-      <div class="flex items-center gap-2">
-        <h3>ddd</h3>
-        <!-- <Badge class="bg-primary px-3 py-1 text-xs md:text-[18px] ">BETA</Badge> -->
+      <div class="flex items-center gap-4">
+        <select bind:value={$selectedFilter} class="border rounded p-2 text-sm">
+          <option value="all">{t.all}</option>
+          <option value="ofrenda">{t.offerings}</option>
+          <option value="route">{t.routes}</option>
+          <option value="information">{t.information}</option>
+          <option value="parking">{t.parking}</option>
+          <option value="hotel">{t.hotel}</option>
+        </select>
 
-        <!-- <Notifications />
-					<DarkModeToggle /> -->
+        <select bind:value={$selectedLanguage} class="border rounded p-2 text-sm">
+          <option value="es">{t.spanish}</option>
+          <option value="en">{t.english}</option>
+        </select>
       </div>
     </header>
     <div class="max-w-none md:container md:mx-auto 2xl:mx-0 2xl:max-w-none">
