@@ -144,6 +144,12 @@
   });
 </script>
 
+<svelte:head>
+  {#if ofrenda}
+    <title>{ofrenda.name[$selectedLanguage as PageLanguageKey]} - Ofrendas Huaquechula</title>
+  {/if}
+</svelte:head>
+
 {#if ofrenda}
 <div class="container mx-auto px-4 py-8">
   <a 

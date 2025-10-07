@@ -27,6 +27,11 @@
   });
 </script>
 
+<svelte:head>
+  <title>Ofrendas Huaquechula</title>
+  <meta name="description" content="Explora las ofrendas monumentales del Día de Muertos en Huaquechula, Puebla" />
+</svelte:head>
+
 <Sidebar.Provider style="--sidebar-width: 280px;">
   <AppSidebar />
   <Sidebar.Inset>

@@ -259,6 +259,12 @@
   }
 </script>
 
+<svelte:head>
+  {#if route}
+    <title>{route.name[$selectedLanguage as PageLanguageKey]} - Ofrendas Huaquechula</title>
+  {/if}
+</svelte:head>
+
 {#if route}
 <div class="container mx-auto px-4 py-8">
   <a 

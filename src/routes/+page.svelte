@@ -4,11 +4,10 @@
 </script>
 
 <svelte:head>
-  <title>Home</title>
-  <meta name="description" content="Svelte demo app" />
+  <title>Ofrendas Huaquechula</title>
+  <meta name="description" content="Explora las ofrendas monumentales del Día de Muertos en Huaquechula, Puebla. Mapa interactivo con ubicaciones de ofrendas, rutas, hoteles y servicios." />
 </svelte:head>
 
 <section class="container mx-auto px-2 md:px-5">
-  <h1 class="text-2xl font-bold text-blue-400 my-4">Map</h1>
   <Map bind:typeFilter={$selectedFilter} />
 </section>
