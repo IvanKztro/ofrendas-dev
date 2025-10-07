@@ -102,6 +102,7 @@
 
   // Crear un icono personalizado para el usuario con dirección
   function createUserIcon(heading: number | null) {
+    const rotation = heading !== null ? heading : 0;
     const svgIcon = `
       <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -114,8 +115,10 @@
         <!-- Círculo azul principal -->
         <circle cx="20" cy="20" r="9" fill="#3388ff"/>
         ${heading !== null ? `
-          <!-- Flecha de dirección más grande -->
-          <path d="M 20 5 L 26 17 L 20 14 L 14 17 Z" fill="white" stroke="white" stroke-width="1.5"/>
+          <!-- Flecha de dirección más grande con rotación -->
+          <g transform="rotate(${rotation} 20 20)">
+            <path d="M 20 5 L 26 17 L 20 14 L 14 17 Z" fill="white" stroke="white" stroke-width="1.5"/>
+          </g>
         ` : ''}
       </svg>
     `;
@@ -136,28 +139,11 @@
     if (userMarker) {
       userMarker.setLatLng([userCoords.lat, userCoords.lng]);
       userMarker.setIcon(icon);
-      
-      // Rotar el marcador según el heading
-      if (userHeading !== null) {
-        const markerElement = userMarker.getElement();
-        if (markerElement) {
-          markerElement.style.transform = `rotate(${userHeading}deg)`;
-          markerElement.style.transformOrigin = 'center';
-        }
-      }
     } else {
       userMarker = L.marker([userCoords.lat, userCoords.lng], {
         icon: icon,
         zIndexOffset: 1000
       }).addTo(map);
-      
-      if (userHeading !== null) {
-        const markerElement = userMarker.getElement();
-        if (markerElement) {
-          markerElement.style.transform = `rotate(${userHeading}deg)`;
-          markerElement.style.transformOrigin = 'center';
-        }
-      }
     }
 
     // Actualizar círculo de precisión
@@ -446,13 +432,12 @@
     @import 'leaflet/dist/leaflet.css';
   }
 
-  :global(.user-location-marker) {
-    transition: transform 0.3s ease-out;
-    will-change: transform;
-  }
-
   :global(.user-location-marker svg) {
     display: block;
+  }
+
+  :global(.user-location-marker svg g) {
+    transition: transform 0.3s ease-out;
   }
 </style>
 
