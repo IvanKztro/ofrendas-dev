@@ -9,7 +9,7 @@
   import type { LanguageKey } from "$lib/stores/generals";
 
   let route = $state<any>(null);
-  let mapElement: HTMLElement;
+  let mapElement = $state<HTMLElement>();
   let map: L.Map | null = null;
   let selectedPoint = $state<any>(null);
 
@@ -40,6 +40,84 @@
       walkingMinutes: "walking minutes",
       pointsOfInterest: "Points of Interest",
       viewDetails: "View full details"
+    },
+    de: {
+      backToMap: "Zurück zur Karte",
+      description: "Beschreibung",
+      routeInfo: "Routeninformation",
+      startPoint: "Startpunkt",
+      endPoint: "Endpunkt",
+      approxLength: "Ungefähre Länge",
+      meters: "Meter",
+      estimatedTime: "Geschätzte Zeit",
+      walkingMinutes: "Gehminuten",
+      pointsOfInterest: "Sehenswürdigkeiten",
+      viewDetails: "Vollständige Details anzeigen"
+    },
+    fr: {
+      backToMap: "Retour à la carte",
+      description: "Description",
+      routeInfo: "Informations sur l'itinéraire",
+      startPoint: "Point de départ",
+      endPoint: "Point d'arrivée",
+      approxLength: "Longueur approximative",
+      meters: "mètres",
+      estimatedTime: "Temps estimé",
+      walkingMinutes: "minutes de marche",
+      pointsOfInterest: "Points d'intérêt",
+      viewDetails: "Voir les détails complets"
+    },
+    it: {
+      backToMap: "Torna alla mappa",
+      description: "Descrizione",
+      routeInfo: "Informazioni sul percorso",
+      startPoint: "Punto di partenza",
+      endPoint: "Punto finale",
+      approxLength: "Lunghezza approssimativa",
+      meters: "metri",
+      estimatedTime: "Tempo stimato",
+      walkingMinutes: "minuti a piedi",
+      pointsOfInterest: "Punti di interesse",
+      viewDetails: "Vedi dettagli completi"
+    },
+    zh: {
+      backToMap: "返回地图",
+      description: "描述",
+      routeInfo: "路线信息",
+      startPoint: "起点",
+      endPoint: "终点",
+      approxLength: "大约长度",
+      meters: "米",
+      estimatedTime: "预计时间",
+      walkingMinutes: "步行分钟",
+      pointsOfInterest: "兴趣点",
+      viewDetails: "查看完整详情"
+    },
+    ja: {
+      backToMap: "地図に戻る",
+      description: "説明",
+      routeInfo: "ルート情報",
+      startPoint: "出発点",
+      endPoint: "終点",
+      approxLength: "おおよその長さ",
+      meters: "メートル",
+      estimatedTime: "推定時間",
+      walkingMinutes: "徒歩分",
+      pointsOfInterest: "観光スポット",
+      viewDetails: "詳細を見る"
+    },
+    ru: {
+      backToMap: "Вернуться к карте",
+      description: "Описание",
+      routeInfo: "Информация о маршруте",
+      startPoint: "Начальная точка",
+      endPoint: "Конечная точка",
+      approxLength: "Приблизительная длина",
+      meters: "метров",
+      estimatedTime: "Расчетное время",
+      walkingMinutes: "минут ходьбы",
+      pointsOfInterest: "Достопримечательности",
+      viewDetails: "Посмотреть полную информацию"
     }
   } as const;
 
@@ -49,8 +127,8 @@
     const id = $page.params.id;
     route = $locations.find((l: any) => l.id === id && l.type === 'route');
     
-    if (!route) {
-      goto("/");
+    if (!route || !mapElement) {
+      if (!route) goto("/");
       return;
     }
 
@@ -90,7 +168,7 @@
                 <div class="mt-2">
                   <h4 class="font-semibold mb-2">${pageTranslations[$selectedLanguage as PageLanguageKey].pointsOfInterest}:</h4>
                   <ul class="list-disc list-inside space-y-1">
-                    ${route.points.map((point: Location['points'][0]) => `
+                    ${route.points.map((point: any) => `
                       <li class="text-sm">
                         <span class="font-medium">${point.name[$selectedLanguage as PageLanguageKey]}</span>
                       </li>
@@ -183,12 +261,12 @@
 
 {#if route}
 <div class="container mx-auto px-4 py-8">
-  <button 
+  <a 
     class="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-    onclick={() => goto("/")}
+    href="/"
   >
     {pageTranslations[$selectedLanguage as PageLanguageKey].backToMap}
-  </button>
+  </a>
 
   <div class="bg-white rounded-lg shadow-lg p-6">
     <h1 class="text-3xl font-bold mb-4">{route.name[$selectedLanguage as PageLanguageKey]}</h1>
