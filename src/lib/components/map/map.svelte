@@ -21,8 +21,6 @@
   let userMarker = $state<L.Marker | null>(null);
   let accuracyCircle = $state<L.Circle | null>(null);
   let userCoords = $state({ lat: 0, lng: 0 });
-  let userHeading = $state<number | null>(null);
-  let previousCoords = $state<{ lat: number, lng: number } | null>(null);
 
   // Traducciones para el mapa
   const mapTranslations = {
@@ -100,9 +98,8 @@
     popupAnchor: [0, -32]
   });
 
-  // Crear un icono personalizado para el usuario con dirección
-  function createUserIcon(heading: number | null) {
-    const rotation = heading !== null ? heading : 0;
+  // Crear un icono personalizado para el usuario
+  function createUserIcon() {
     const svgIcon = `
       <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -114,12 +111,6 @@
         <circle cx="20" cy="20" r="11" fill="white" filter="url(#shadow)"/>
         <!-- Círculo azul principal -->
         <circle cx="20" cy="20" r="9" fill="#3388ff"/>
-        ${heading !== null ? `
-          <!-- Flecha de dirección más grande con rotación -->
-          <g transform="rotate(${rotation} 20 20)">
-            <path d="M 20 5 L 26 17 L 20 14 L 14 17 Z" fill="white" stroke="white" stroke-width="1.5"/>
-          </g>
-        ` : ''}
       </svg>
     `;
     
@@ -134,11 +125,10 @@
   function updateUserMarker() {
     if (!map || userCoords.lat === 0 || userCoords.lng === 0) return;
 
-    const icon = createUserIcon(userHeading);
+    const icon = createUserIcon();
     
     if (userMarker) {
       userMarker.setLatLng([userCoords.lat, userCoords.lng]);
-      userMarker.setIcon(icon);
     } else {
       userMarker = L.marker([userCoords.lat, userCoords.lng], {
         icon: icon,
@@ -150,22 +140,6 @@
     if (accuracyCircle) {
       accuracyCircle.setLatLng([userCoords.lat, userCoords.lng]);
     }
-  }
-
-  // Calcular el heading basado en dos coordenadas
-  function calculateHeading(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const lat1Rad = lat1 * Math.PI / 180;
-    const lat2Rad = lat2 * Math.PI / 180;
-    
-    const y = Math.sin(dLng) * Math.cos(lat2Rad);
-    const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) -
-              Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLng);
-    
-    let heading = Math.atan2(y, x) * 180 / Math.PI;
-    heading = (heading + 360) % 360; // Normalizar a 0-360
-    
-    return heading;
   }
 
   function centerOnUser() {
@@ -215,11 +189,6 @@
             lng: pos.coords.longitude
           };
 
-          // Capturar el heading si está disponible
-          if (pos.coords.heading !== null && pos.coords.heading !== undefined) {
-            userHeading = pos.coords.heading;
-          }
-
           if (map) {
             // Crear círculo de precisión
             accuracyCircle = L.circle([userCoords.lat, userCoords.lng], {
@@ -240,35 +209,10 @@
 
       navigator.geolocation.watchPosition(
         (pos) => {
-          const newCoords = {
+          userCoords = {
             lat: pos.coords.latitude,
             lng: pos.coords.longitude
           };
-
-          // Capturar el heading si está disponible del GPS
-          if (pos.coords.heading !== null && pos.coords.heading !== undefined && pos.coords.heading >= 0) {
-            userHeading = pos.coords.heading;
-          } 
-          // Si no hay heading del GPS, calcular basado en el movimiento
-          else if (previousCoords && userCoords.lat !== 0 && userCoords.lng !== 0) {
-            const distance = Math.sqrt(
-              Math.pow(newCoords.lat - userCoords.lat, 2) + 
-              Math.pow(newCoords.lng - userCoords.lng, 2)
-            );
-            
-            // Solo actualizar el heading si hubo movimiento significativo (más de 0.00001 grados ≈ 1 metro)
-            if (distance > 0.00001) {
-              userHeading = calculateHeading(
-                userCoords.lat, 
-                userCoords.lng, 
-                newCoords.lat, 
-                newCoords.lng
-              );
-            }
-          }
-
-          previousCoords = { ...userCoords };
-          userCoords = newCoords;
 
           if (map) {
             // Actualizar círculo de precisión
@@ -291,23 +235,6 @@
         (err) => console.warn("Error en seguimiento de ubicación:", err),
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
-    }
-
-    // Escuchar eventos de orientación del dispositivo como respaldo
-    if (window.DeviceOrientationEvent) {
-      window.addEventListener('deviceorientation', (event: DeviceOrientationEvent) => {
-        // Solo usar orientación del dispositivo si no tenemos heading del GPS
-        if (userHeading === null && event.alpha !== null) {
-          // event.alpha da el heading en iOS, webkitCompassHeading en algunos dispositivos
-          const eventWithCompass = event as DeviceOrientationEvent & { webkitCompassHeading?: number };
-          const heading = eventWithCompass.webkitCompassHeading !== undefined 
-            ? eventWithCompass.webkitCompassHeading 
-            : 360 - event.alpha;
-          
-          userHeading = heading;
-          updateUserMarker();
-        }
-      });
     }
 
     return () => {
@@ -434,10 +361,6 @@
 
   :global(.user-location-marker svg) {
     display: block;
-  }
-
-  :global(.user-location-marker svg g) {
-    transition: transform 0.3s ease-out;
   }
 </style>
 
