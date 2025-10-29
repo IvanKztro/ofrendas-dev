@@ -315,7 +315,7 @@
           const popupContent = lugar.type === 'ofrenda' 
             ? `
               <div class="flex flex-col gap-2">
-                <b>${lugar.name[$selectedLanguage as MapLanguageKey]}</b>
+                <b>${lugar.id}.- ${lugar.name[$selectedLanguage as MapLanguageKey]}</b>
                 <p>${lugar.type}</p>
                 <button 
                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
